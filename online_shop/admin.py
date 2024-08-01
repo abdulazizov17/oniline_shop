@@ -8,4 +8,5 @@ admin.site.register(Product)
 admin.site.register(Comment)
 admin.site.register(Order)
 
+
 # Register your models here.

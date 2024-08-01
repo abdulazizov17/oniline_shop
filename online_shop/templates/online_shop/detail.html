@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -49,34 +49,42 @@
         <section class="py-5">
             <div class="container px-4 px-lg-5 my-5">
                 <div class="row gx-4 gx-lg-5 align-items-center">
-                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="https://dummyimage.com/600x700/dee2e6/6c757d.jpg" alt="..." /></div>
+                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="{{ product.image }}" alt="..." /></div>
                     <div class="col-md-6">
-                        <div class="small mb-1">Rating: 124 </div>
-                        <h1 class="display-5 fw-bolder">Shop item template</h1>
+                        <div class="small mb-1">Quantity: {{ product.quantity }}</div>
+                        <h1 class="display-5 fw-bolder">{{ product.name }}</h1>
+                        {% if product.discount %}
                         <div class="fs-5 mb-5">
-                            <span class="text-decoration-line-through">$45.00</span>
-                            <span>$40.00</span>
+                            <span class="text-decoration-line-through">${{ product.price }}</span>
+                            <span>${{ product.discounted_price}}</span>
                         </div>
-                        <p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?</p>
+                        {% else %}
+                            <span>${{ product.price }}</span>
+                        {% endif %}
+                        <p class="lead">{{ product.discription }}</p>
                         <div class="d-flex">
-                            <form>
+                            <form method="post" action="{% url 'add_order' product.id %}">
+                                {% csrf_token  %}
                                 <div class="form-group">
                                     <h2>Place an order</h2>
                                 </div>
                                 <div class="form-group mb-3">
                                   <label for="formGroupExampleInput">Your name</label>
-                                  <input type="text" class="form-control"  placeholder="Your name">
+                                  <input type="text" class="form-control" name="name" placeholder="Your name">
                                 </div>
                                 <div class="form-group mb-3">
                                   <label for="formGroupExampleInput2">Your phone</label>
-                                  <input type="text" class="form-control" placeholder="Your phone">
+                                  <input type="number" class="form-control" name="phone" placeholder="Your phone">
+                                <div class="form-group mb-3">
+                                  <label for="formGroupExampleInput">Quantity</label>
+                                  <input type="number" class="form-control" name="quantity" placeholder="Quantity">
                                 </div>
-        
-                               
-        
+                                </div>
+
+
                                   <div class="form-group mb-3">
-                                   
-                                    <input type="text" class="btn btn-success" value="Send">
+
+                                    <input type="submit" class="btn btn-success" value="Send">
                                   </div>
                               </form>
                            
@@ -90,29 +98,16 @@
             <div class="row">
                 <div class="col-12">
                     <div class="text-center">
-                        <h2>Latest comments</h2>
+                        <h2>Latest comments {{ product.comments.count }}</h2>
                     </div>
-
+                    {% for comment in comments %}
                     <div class="media card p-4 mt-2">
                         <div class="media-body">
-                          <h3 class="mt-0">John Doe</h3>
-                          Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
+                          <h3 class="mt-0">{{ comment.user }} => {{ comment.create_at }}</h3>
+                            {{comment.body}}                        </div>
                     </div>
+                    {% endfor %}
 
-                    <div class="media card p-4 mt-2">
-                        <div class="media-body">
-                          <h3 class="mt-0">John Doe</h3>
-                          Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
-                    </div>
-
-                    <div class="media card p-4 mt-2">
-                        <div class="media-body">
-                          <h3 class="mt-0">John Doe</h3>
-                          Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
-                    </div>
 
                 </div>
 
@@ -122,25 +117,37 @@
                         <div class="text-center">
                             <h3>Add Comment</h3>
                         </div>
-                    
-                    <form>
+                    <div>
+                            {% if form.errors %}
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">
+                                            <strong>{{ error|escape }}</strong>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                    <form method="post" action="{% url 'add_comment' product.id  %}" >
+                        {% csrf_token %}
                         <div class="form-group mb-3">
                           <label for="formGroupExampleInput">Your name</label>
-                          <input type="text" class="form-control"  placeholder="Your name">
+                          <input type="text" class="form-control" name="name"  placeholder="Your name">
                         </div>
                         <div class="form-group mb-3">
                           <label for="formGroupExampleInput2">Your email</label>
-                          <input type="text" class="form-control" placeholder="Your email">
+                          <input type="email" class="form-control" name="email" placeholder="Your email">
                         </div>
 
                         <div class="form-group mb-3">
                             <label for="formGroupExampleInput2">Your comment</label>
-                           <textarea name="" class="form-control" id="" cols="30" rows="10"></textarea>
+                           <textarea name="body" class="form-control" id="" cols="30" rows="10"></textarea>
                           </div>
 
                           <div class="form-group mb-3">
                            
-                            <input type="text" class="btn btn-success" value="Send">
+                            <input type="submit" class="btn btn-success" value="Send">
                           </div>
                       </form>
 
@@ -158,19 +165,19 @@
                         <div class="card h-100">
                             <!-- Product image-->
                             <img class="card-img-top" 
-                            src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                            src="{{ product.image }}" alt="..." />
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-center">
                                     <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
+                                    <h5 class="fw-bolder">{{ product.name }}</h5>
                                     <!-- Product price-->
-                                    $40.00 - $80.00
+                                    ${{ product.price }} - ${{ product.discount }}
                                 </div>
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="detail.html">View product</a></div>
+                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product_detail' product.id %}">View product</a></div>
 
                         
                             </div>
@@ -183,19 +190,19 @@
                         <div class="card h-100">
                             <!-- Product image-->
                             <img class="card-img-top" 
-                            src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                            src="{{ product.image}}" alt="..." />
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-center">
                                     <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
+                                    <h5 class="fw-bolder">{{ product.name }}</h5>
                                     <!-- Product price-->
-                                    $40.00 - $80.00
+                                    ${{ product.discount }} - ${{ product.price }}
                                 </div>
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="detail.html">View product</a></div>
+                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product_detail' product.id %}">View product</a></div>
 
                         
                             </div>
@@ -206,19 +213,19 @@
                         <div class="card h-100">
                             <!-- Product image-->
                             <img class="card-img-top" 
-                            src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                            src="{{ product.image }} alt=".../>
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-center">
                                     <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
+                                    <h5 class="fw-bolder">{{ product.name }}</h5>
                                     <!-- Product price-->
-                                    $40.00 - $80.00
+                                    ${{ product.discount }} - ${{ product.price }}
                                 </div>
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="detail.html">View product</a></div>
+                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product_detail' product.id %}">View product</a></div>
 
                         
                             </div>
@@ -229,19 +236,19 @@
                         <div class="card h-100">
                             <!-- Product image-->
                             <img class="card-img-top" 
-                            src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                            src="{{ product.image}}" alt="..." />
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-center">
                                     <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
+                                    <h5 class="fw-bolder">{{ product.name }}</h5>
                                     <!-- Product price-->
-                                    $40.00 - $80.00
+                                    ${{ product.price }} - ${{ product.price }}
                                 </div>
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="detail.html">View product</a></div>
+                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product_detail' product.id %}">View product</a></div>
 
                         
                             </div>

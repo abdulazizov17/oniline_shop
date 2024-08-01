@@ -1,14 +1,25 @@
 # models.py
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
+class BaseModel(models.Model):
+        create_at =models.DateTimeField(auto_now=True)
+        update_at = models.DateTimeField(auto_now=True)
+
+        class Meta:
+            abstract = True
 
 class Catagory(models.Model):
     title = models.CharField(max_length=50, unique=True)
+    class Meta:
+        verbose_name_plural = 'Catagories'
+
 
     def __str__(self):
         return self.title
 
-class Product(models.Model):
+
+class Product(BaseModel):
     class RatingChoices(models.IntegerChoices):
         zero = 0
         one = 1
@@ -19,14 +30,12 @@ class Product(models.Model):
 
     name = models.CharField(max_length=100)
     discription = models.TextField(null=True)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
-    image = models.ImageField(upload_to='products')
+    price = models.FloatField(null=True, blank=True)
+    image = models.ImageField(upload_to='products', null=True)
     category = models.ForeignKey(Catagory, on_delete=models.CASCADE, related_name='products')
     quantity = models.IntegerField(default=0)
     raiting = models.PositiveSmallIntegerField(choices=RatingChoices.choices, default=RatingChoices.zero)
     discount = models.PositiveSmallIntegerField(default=0)
-    create_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
     @property
     def discounted_price(self):
@@ -37,20 +46,32 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
 
+class Comment(BaseModel):
+    user = models.ForeignKey(User,max_length=100, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255)
+    body = models.TextField()
+    product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE)
+    is_provide = models.BooleanField(default=False)
     def __str__(self):
         return f'Comment by {self.user.username} on {self.product.name}'
 
+
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    name = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='order')
     quantity = models.PositiveIntegerField()
+    phone = models.CharField(max_length=15)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+    def save(self, *args, **kwargs):
+        self.product.quantity -= self.quantity
+        self.product.save()
+        super().save(*args, **kwargs)
+
+
     def __str__(self):
-        return f'Order by {self.user.username} for {self.product.name}'
+        return f'Order by {self.name.username} for {self.product.name}'
+
+
